@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use AIDE in your research, please cite the accompanying paper and this software release."
+title: "Agentic Intelligent Data Engine for Scientific Large Language Models"
+version: "0.1.0"
+date-released: "2026-06-10"
+type: software
+license: MIT
+authors:
+  - family-names: Xie
+    given-names: Shufang
+  - family-names: Liu
+    given-names: Zequn
+  - family-names: Deng
+    given-names: Pan
+  - family-names: Luo
+    given-names: Renqian
+  - family-names: Xia
+    given-names: Yingce
+  - family-names: Qin
+    given-names: Tao
+  - family-names: Yan
+    given-names: Rui
+keywords:
+  - data curation
+  - AI for Science
+  - retrieval-augmented generation
+  - instruction tuning
+  - Hugging Face
+abstract: "AIDE is an agentic data-curation pipeline for scientific large language models, covering data collection, data selection, and data organization."

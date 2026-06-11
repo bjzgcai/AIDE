@@ -1,0 +1,17 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+.venv/
+.ruff_cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+dist/
+reports/
+
+# Local runs and downloaded data
+cache/
+outputs/
+*.log
+configs/local_*.yaml

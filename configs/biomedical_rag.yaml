@@ -1,0 +1,14 @@
+prompt: "Curate biomedical question-answering corpora suitable for retrieval-augmented generation."
+output_dir: "outputs"
+cache_dir: "cache/huggingface"
+use_llm_collection_keywords: true
+collection_keyword_model: "openai/gpt-4o-mini"
+collection_keyword_attempts: 3
+max_results_per_term: 5
+max_datasets: 10
+selection_model: "openai/gpt-4o-mini"
+selection_score_threshold: 5
+organization_format: "rag"
+organization_model: "openai/gpt-4o-mini"
+rag_dataset_split: "train"
+rag_max_items_per_dataset: 1000

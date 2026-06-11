@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Unit Tests And Formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Check formatting
+        run: uv run ruff format --check .
+
+      - name: Lint
+        run: uv run ruff check src tests
+
+      - name: Unit tests
+        run: |
+          mkdir -p reports
+          uv run pytest -q --junitxml=reports/unit-tests.xml
+
+      - name: Report test pass rate
+        if: always()
+        run: |
+          uv run python - <<'PY'
+          import os
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+          junit_path = Path("reports/unit-tests.xml")
+          if not summary_path:
+              raise SystemExit(0)
+
+          with open(summary_path, "a", encoding="utf-8") as summary:
+              summary.write("## Test Summary\n\n")
+              if not junit_path.exists():
+                  summary.write("JUnit report was not generated.\n")
+                  raise SystemExit(0)
+
+              root = ET.parse(junit_path).getroot()
+              tests = int(root.attrib.get("tests", 0))
+              failures = int(root.attrib.get("failures", 0))
+              errors = int(root.attrib.get("errors", 0))
+              skipped = int(root.attrib.get("skipped", 0))
+              passed = max(0, tests - failures - errors - skipped)
+              pass_rate = (passed / tests * 100) if tests else 0.0
+
+              summary.write(f"- Tests: {tests}\n")
+              summary.write(f"- Passed: {passed}\n")
+              summary.write(f"- Failed: {failures + errors}\n")
+              summary.write(f"- Skipped: {skipped}\n")
+              summary.write(f"- Pass rate: {pass_rate:.1f}%\n")
+          PY
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: reports/unit-tests.xml
+          if-no-files-found: ignore

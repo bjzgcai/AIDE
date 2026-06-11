@@ -1,0 +1,15 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">AIDE mark</title>
+  <desc id="desc">A geometric data-curation mark showing collection, selection, and organization.</desc>
+  <rect width="256" height="256" rx="48" fill="#0B1220"/>
+  <path d="M56 78C56 65.85 65.85 56 78 56H178C190.15 56 200 65.85 200 78V178C200 190.15 190.15 200 178 200H78C65.85 200 56 190.15 56 178V78Z" fill="#111D33" stroke="#38BDF8" stroke-width="4"/>
+  <circle cx="86" cy="88" r="11" fill="#22C55E"/>
+  <circle cx="86" cy="128" r="11" fill="#38BDF8"/>
+  <circle cx="86" cy="168" r="11" fill="#60A5FA"/>
+  <path d="M101 88H133" stroke="#94A3B8" stroke-width="6" stroke-linecap="round"/>
+  <path d="M101 128H133" stroke="#94A3B8" stroke-width="6" stroke-linecap="round"/>
+  <path d="M101 168H133" stroke="#94A3B8" stroke-width="6" stroke-linecap="round"/>
+  <path d="M136 88L170 128L136 168" stroke="#22C55E" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M146 128H192" stroke="#38BDF8" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="192" cy="128" r="14" fill="#E0F2FE" stroke="#38BDF8" stroke-width="4"/>
+</svg>

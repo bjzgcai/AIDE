@@ -1,0 +1,15 @@
+prompt: "Curate biomedical question-answering corpora suitable for retrieval-augmented generation."
+output_dir: "outputs/smoke_biomedical_rag"
+cache_dir: "cache/huggingface"
+use_llm_collection_keywords: false
+max_results_per_term: 2
+max_datasets: 1
+selection_model: "openai/gpt-4o-mini"
+selection_score_threshold: 0
+organization_format: "rag"
+organization_model: "openai/gpt-4o-mini"
+rag_dataset_split: "train"
+rag_max_items_per_dataset: 5
+rag_sample_size: 3
+rag_max_retries: 2
+rag_streaming: false

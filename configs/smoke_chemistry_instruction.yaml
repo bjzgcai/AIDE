@@ -1,0 +1,14 @@
+prompt: "Curate chemistry question-answering datasets and organize them as instruction-response pairs for scientific LLM training."
+output_dir: "outputs/smoke_chemistry_instruction"
+cache_dir: "cache/huggingface"
+use_llm_collection_keywords: false
+max_results_per_term: 2
+max_datasets: 1
+selection_model: "openai/gpt-4o-mini"
+selection_score_threshold: 0
+organization_format: "instruction"
+organization_model: "openai/gpt-4o-mini"
+instruction_max_retries: 2
+instruction_sample_size: 3
+instruction_quality_check: true
+instruction_max_items_per_dataset: 5
