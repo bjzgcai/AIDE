@@ -29,6 +29,7 @@ dependencies = [
     "backoff>=2.2.1",
     "datasets==5.0.0",
     "datasketch>=1.6.5",
+    "httpx[socks]>=0.23.0",
     "huggingface-hub>=0.26.2",
     "jsonargparse[signatures]>=4.38.0",
     "loguru>=0.7.2",
