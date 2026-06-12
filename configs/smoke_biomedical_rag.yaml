@@ -11,3 +11,5 @@ selection_score_threshold: 5
 organization_format: "rag"
 organization_model: "deepseek/deepseek-v4-flash"
 rag_dataset_split: "train"
+rag_max_items_per_dataset: 20
+rag_streaming: false

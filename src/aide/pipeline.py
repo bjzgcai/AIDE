@@ -70,6 +70,15 @@ class AIDEPipeline:
         self.instruction_organizer = InstructionOrganizer(config)
         self.rag_organizer = RAGOrganizer(config)
 
+    def _limit_datasets(self, datasets: list[DatasetInfo]) -> list[DatasetInfo]:
+        max_datasets = self.config.max_datasets
+        if max_datasets > 0 and len(datasets) > max_datasets:
+            logger.info(
+                f"Limiting candidate datasets from {len(datasets)} to {max_datasets}."
+            )
+            return datasets[:max_datasets]
+        return datasets
+
     def search_dataset(self, prompt: list[str]):
         """
         Conduct dataset search in the Hugging Face Hub.
@@ -243,21 +252,13 @@ class AIDEPipeline:
                 },
             ):
                 datasets = get_datasets(self, keywords)
+                datasets = self._limit_datasets(datasets)
             search_end_time = time.time()
             all_datasets = len(datasets)
             if tracker:
                 tracker.persist(force=True)
 
             selection_start_time = time.time()
-
-            @cache_step(
-                selection_path,
-                serialize_fn=lambda ds: [d.__dict__ for d in ds],
-                deserialize_fn=lambda ds: [DatasetInfo(**d) for d in ds],
-                step_name="selection",
-            )
-            def get_selected_datasets(self, datasets, user_query):
-                return self.select_datasets(datasets, user_query)
 
             with metrics_scope(
                 "selection",
@@ -266,7 +267,8 @@ class AIDEPipeline:
                     "model": self.config.selection_model,
                 },
             ):
-                datasets = get_selected_datasets(self, datasets, user_query)
+                datasets = self.select_datasets(datasets, user_query)
+                save_json([d.__dict__ for d in datasets], selection_path)
             selection_end_time = time.time()
             selected_datasets = len(datasets)
             if tracker:

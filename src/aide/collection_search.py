@@ -186,14 +186,14 @@ class HFDatasetCollector:
                         )
                         ret.append(dataset_info_obj)
                         per_term_count += 1
+                        if max_results > 0 and len(ret) >= max_results:
+                            return ret
                         # limit per-term results
                         if (
                             max_results_per_term > 0
                             and per_term_count >= max_results_per_term
                         ):
                             break
-                        if len(ret) >= max_results > 0:
-                            return ret
                 # stop if per-term limit reached for this keyword
                 if max_results_per_term > 0 and per_term_count >= max_results_per_term:
                     break
