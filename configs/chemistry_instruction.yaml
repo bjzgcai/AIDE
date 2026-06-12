@@ -1,15 +1,15 @@
-prompt: "Curate chemistry text datasets and organize them as instruction-response pairs for scientific LLM training."
+prompt: "Collect all the chemistry text for instruction tuning."
 output_dir: "outputs"
 cache_dir: "cache/huggingface"
 use_llm_collection_keywords: true
-collection_keyword_model: "openai/gpt-4o-mini"
+collection_keyword_model: "openai/gpt-5.1"
 collection_keyword_attempts: 3
 max_results_per_term: 5
-max_datasets: 10
-selection_model: "openai/gpt-4o-mini"
+max_datasets: 100
+selection_model: "openai/gpt-5.1"
 selection_score_threshold: 5
 organization_format: "instruction"
-organization_model: "openai/gpt-4o-mini"
+organization_model: "openai/gpt-5.1"
 instruction_max_retries: 3
 instruction_sample_size: 5
 instruction_quality_check: true
