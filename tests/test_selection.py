@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch
 
-from aide import DatasetInfo
-from aide.selection import load_dataset_safe
+from aide import AIDEConfig, DatasetInfo
+from aide.selection import DatasetSelector, load_dataset_safe
 
 
 def _dataset_info() -> DatasetInfo:
@@ -42,6 +42,17 @@ class SelectionTests(unittest.TestCase):
             set(call_kwargs),
         )
         self.assertTrue(call_kwargs["streaming"])
+
+    def test_analyze_handles_missing_description(self) -> None:
+        dataset_info = _dataset_info()
+        dataset_info.description = None
+        selector = DatasetSelector(AIDEConfig(prompt="science", enable_stage_metrics=False))
+
+        with patch("aide.selection.load_dataset_samples", return_value=[]):
+            result = selector.analyze(dataset_info, "science qa")
+
+        self.assertEqual(0, result.score)
+        self.assertEqual("No samples found in the dataset.", result.report)
 
 
 if __name__ == "__main__":

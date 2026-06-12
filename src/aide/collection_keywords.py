@@ -1,4 +1,5 @@
 import json
+import re
 
 import backoff
 from loguru import logger
@@ -18,21 +19,37 @@ class KeywordGenerator:
     def _extract_json_from_response(
         self, response: str, attempt_num: int
     ) -> str | None:
-        """Extract JSON content from markdown code blocks in the response."""
-        # Handle both ```json\n[...]``` and ```[...]``` code blocks
-        # Try to find a code block containing JSON, but fallback to any code block if not found
-        start = response.find("```json")
-        if start != -1:
-            end = response.find("```", start + 7)
-            if end != -1:
-                return response[start + 7 : end].strip()
-        # If not found, try to find any code block (e.g., ```\n[...]```)
-        start = response.find("```")
-        if start != -1:
-            end = response.find("```", start + 3)
-            if end != -1:
-                return response[start + 3 : end].strip()
-        logger.warning(f"No JSON found in response for attempt {attempt_num}")
+        """Extract parseable JSON content from an LLM response."""
+        candidates = [
+            match.strip()
+            for match in re.findall(
+                r"```(?:\w+)?\s*(.*?)```",
+                response,
+                flags=re.DOTALL | re.IGNORECASE,
+            )
+        ]
+        stripped_response = response.strip()
+        if stripped_response:
+            candidates.append(stripped_response)
+
+        decoder = json.JSONDecoder()
+        for start, char in enumerate(response):
+            if char not in "[{":
+                continue
+            try:
+                _, end = decoder.raw_decode(response[start:])
+            except json.JSONDecodeError:
+                continue
+            candidates.append(response[start : start + end].strip())
+
+        for candidate in candidates:
+            try:
+                json.loads(candidate)
+            except json.JSONDecodeError:
+                continue
+            return candidate
+
+        logger.warning(f"No parseable JSON found in response for attempt {attempt_num}")
         return None
 
     def _parse_and_validate_keywords(

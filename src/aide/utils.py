@@ -15,6 +15,51 @@ from openai import AsyncOpenAI, OpenAI
 from .metrics import get_active_metrics_tracker
 
 
+_SENSITIVE_LOG_KEYS = (
+    "token",
+    "api_key",
+    "apikey",
+    "authorization",
+    "password",
+    "secret",
+)
+_HF_TOKEN_PATTERN = re.compile(r"\bhf_[A-Za-z0-9_=-]{8,}\b")
+_BEARER_TOKEN_PATTERN = re.compile(
+    r"\bbearer\s+[A-Za-z0-9._~+/=-]+", flags=re.IGNORECASE
+)
+
+
+def _is_sensitive_log_key(key: str) -> bool:
+    normalized = key.lower().replace("-", "_")
+    return any(sensitive in normalized for sensitive in _SENSITIVE_LOG_KEYS)
+
+
+def _redact_sensitive_text(text: str) -> str:
+    text = _HF_TOKEN_PATTERN.sub("hf_[REDACTED]", text)
+    return _BEARER_TOKEN_PATTERN.sub("Bearer [REDACTED]", text)
+
+
+def _sanitize_for_log(value, key: str | None = None):
+    if key is not None and _is_sensitive_log_key(key):
+        return "[REDACTED]"
+    if isinstance(value, str):
+        return _redact_sensitive_text(value)
+    if isinstance(value, BaseException):
+        return _redact_sensitive_text(repr(value))
+    if isinstance(value, dict):
+        return {
+            item_key: _sanitize_for_log(item_value, str(item_key))
+            for item_key, item_value in value.items()
+        }
+    if isinstance(value, tuple):
+        return tuple(_sanitize_for_log(item) for item in value)
+    if isinstance(value, list):
+        return [_sanitize_for_log(item) for item in value]
+    if isinstance(value, set):
+        return [_sanitize_for_log(item) for item in value]
+    return value
+
+
 def make_safe_call(
     allow_failure: bool = False,
     giveup: Callable[[Exception], bool] | None = None,
@@ -38,10 +83,10 @@ def make_safe_call(
             giveup=should_give_up,
             raise_on_giveup=not allow_failure,
             on_backoff=lambda details: logger.warning(
-                f"Retrying {func.__name__} due to {details}"
+                f"Retrying {func.__name__} due to {_sanitize_for_log(details)}"
             ),
             on_giveup=lambda details: logger.warning(
-                f"Failed to call {func.__name__} due to {details}. Giving up."
+                f"Failed to call {func.__name__} due to {_sanitize_for_log(details)}. Giving up."
             ),
         )
         def wrapper(*args, **kwargs):
@@ -105,10 +150,12 @@ def save_json(data, path):
 
 
 def load_json(path):
-    """Load JSON data from the given path using json. Returns None if file is invalid."""
+    """Load JSON data from the given path. Returns None if missing or invalid."""
     try:
         with open(path, encoding="utf-8") as f:
             return json.load(f)
+    except FileNotFoundError:
+        return None
     except Exception as e:
         logger.error(f"Failed to load JSON from {path}: {e}")
         return None

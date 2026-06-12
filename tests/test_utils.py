@@ -1,8 +1,18 @@
 import os
+import tempfile
 import unittest
 from unittest.mock import patch
 
-from aide.utils import _llm_api_base, _llm_api_key, _llm_extra_body, extract_code
+from loguru import logger
+
+from aide.utils import (
+    _llm_api_base,
+    _llm_api_key,
+    _llm_extra_body,
+    extract_code,
+    load_json,
+    make_safe_call,
+)
 
 
 class LLMEnvironmentTests(unittest.TestCase):
@@ -47,6 +57,52 @@ class LLMEnvironmentTests(unittest.TestCase):
         with patch.dict(os.environ, {"LLM_EXTRA_BODY_JSON": "[]"}, clear=True):
             with self.assertRaises(ValueError):
                 _llm_extra_body()
+
+
+class JSONLoadingTests(unittest.TestCase):
+    def test_missing_json_returns_none_without_error_log(self) -> None:
+        messages = []
+        sink_id = logger.add(
+            lambda message: messages.append(str(message)),
+            format="{level}:{message}",
+            level="DEBUG",
+        )
+        try:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                self.assertIsNone(load_json(os.path.join(tmpdir, "missing.json")))
+        finally:
+            logger.remove(sink_id)
+
+        self.assertFalse(any(message.startswith("ERROR:") for message in messages))
+
+
+class SafeCallLoggingTests(unittest.TestCase):
+    def test_make_safe_call_redacts_huggingface_tokens(self) -> None:
+        secret = "hf_FAKE1234567890TOKEN"
+        messages = []
+        sink_id = logger.add(
+            lambda message: messages.append(str(message)),
+            format="{message}",
+            level="WARNING",
+        )
+
+        @make_safe_call(allow_failure=True, max_tries=1)
+        def always_fails(**_kwargs):
+            raise RuntimeError(f"failed while using {secret}")
+
+        try:
+            self.assertIsNone(
+                always_fails(
+                    token=secret,
+                    headers={"Authorization": f"Bearer {secret}"},
+                )
+            )
+        finally:
+            logger.remove(sink_id)
+
+        joined = "".join(messages)
+        self.assertNotIn(secret, joined)
+        self.assertIn("[REDACTED]", joined)
 
 
 class CodeExtractionTests(unittest.TestCase):

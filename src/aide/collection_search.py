@@ -104,13 +104,21 @@ class HFDatasetCollector:
                 f"Number of examples not available for {hf_hub_ds_info.id} - {config}, setting to {num_examples}"
             )
 
+        card_data = hf_hub_ds_info.cardData or {}
+        hf_tags = card_data.get("tags") or []
+        if not isinstance(hf_tags, list):
+            hf_tags = [str(hf_tags)]
+        modalities = card_data.get("modalities") or []
+        if not isinstance(modalities, list):
+            modalities = [str(modalities)]
+
         return DatasetInfo(
             name=hf_hub_ds_info.id,
             subset=config,
-            description=getattr(hf_hub_ds_info, "description", ""),
-            license=str(hf_hub_ds_info.cardData.get("license", "N/A")),
-            hf_tags=hf_hub_ds_info.cardData.get("tags", []),
-            modalities=hf_hub_ds_info.cardData.get("modalities", []),
+            description=str(getattr(hf_hub_ds_info, "description", "") or ""),
+            license=str(card_data.get("license") or "N/A"),
+            hf_tags=hf_tags,
+            modalities=modalities,
             n_likes=int(hf_hub_ds_info.likes) if hf_hub_ds_info.likes else 0,
             n_downloads_last_month=(
                 int(hf_hub_ds_info.downloads) if hf_hub_ds_info.downloads else 0

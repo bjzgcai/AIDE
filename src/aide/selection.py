@@ -154,7 +154,7 @@ class DatasetSelector:
         self.config = config
 
     def analyze(self, dataset_info: DatasetInfo, user_goal: str) -> AnalyzerResult:
-        description = dataset_info.description
+        description = str(dataset_info.description or "")
         if len(description) > 4000:
             description = description[:4000] + "...(omitted)"
 

@@ -61,6 +61,29 @@ class CollectionSearchTests(unittest.TestCase):
         self.assertEqual("demo/alpha", results[0].name)
         self.assertEqual(["alpha"], list_calls)
 
+    def test_process_dataset_config_normalizes_missing_metadata(self) -> None:
+        hub_info = _hub_dataset_info("demo/null-description")
+        hub_info.description = None
+        hub_info.cardData = {
+            "license": None,
+            "tags": None,
+            "modalities": "text",
+        }
+
+        with patch(
+            "aide.collection_search._safe_load_dataset_builder",
+            new=lambda *_args, **_kwargs: _builder(),
+        ):
+            result = HFDatasetCollector(cache_dir="cache")._process_dataset_config(
+                hub_info, "default"
+            )
+
+        self.assertIsNotNone(result)
+        self.assertEqual("", result.description)
+        self.assertEqual("N/A", result.license)
+        self.assertEqual([], result.hf_tags)
+        self.assertEqual(["text"], result.modalities)
+
 
 if __name__ == "__main__":
     unittest.main()
