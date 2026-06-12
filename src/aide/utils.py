@@ -775,11 +775,21 @@ def extract_code(s: str) -> str:
     """
     Extract Python code from a string.
     """
-    pattern = r"```python(.*?)```"
-    matches = re.findall(pattern, s, re.DOTALL)
-    if matches == []:
-        return s
-    return matches[0]
+    fenced_blocks = re.findall(r"```(?:python|py)?\s*(.*?)```", s, re.DOTALL)
+    for block in fenced_blocks:
+        if "def process_data" in block:
+            return block.strip()
+    if fenced_blocks:
+        return fenced_blocks[0].strip()
+
+    stripped = s.strip()
+    if "def process_data" not in stripped:
+        return ""
+
+    import_match = re.search(r"(?m)^(?:import\s+\w+|from\s+\w+)", stripped)
+    def_match = re.search(r"(?m)^def\s+process_data\s*\(", stripped)
+    start = import_match.start() if import_match else def_match.start()
+    return stripped[start:]
 
 
 def remove_non_serializable_fields(item: dict):

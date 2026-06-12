@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest.mock import patch
 
-from aide.utils import _llm_api_base, _llm_api_key, _llm_extra_body
+from aide.utils import _llm_api_base, _llm_api_key, _llm_extra_body, extract_code
 
 
 class LLMEnvironmentTests(unittest.TestCase):
@@ -47,6 +47,27 @@ class LLMEnvironmentTests(unittest.TestCase):
         with patch.dict(os.environ, {"LLM_EXTRA_BODY_JSON": "[]"}, clear=True):
             with self.assertRaises(ValueError):
                 _llm_extra_body()
+
+
+class CodeExtractionTests(unittest.TestCase):
+    def test_extract_code_from_python_fence(self) -> None:
+        self.assertEqual(
+            extract_code("```python\ndef process_data(data):\n    return []\n```"),
+            "def process_data(data):\n    return []",
+        )
+
+    def test_extract_code_from_bare_fence(self) -> None:
+        self.assertEqual(
+            extract_code("```\ndef process_data(data):\n    return []\n```"),
+            "def process_data(data):\n    return []",
+        )
+
+    def test_extract_code_rejects_non_code_text(self) -> None:
+        self.assertEqual(extract_code("Now, please write the function."), "")
+
+    def test_extract_code_keeps_raw_function_without_fence(self) -> None:
+        code = "import json\n\ndef process_data(data):\n    return []"
+        self.assertEqual(extract_code(code), code)
 
 
 if __name__ == "__main__":

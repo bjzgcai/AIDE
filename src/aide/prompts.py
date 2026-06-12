@@ -224,7 +224,6 @@ An item is a dictionary with the following keys:
 - DO NOT suppress unexpected exceptions. Do Not put the overall logic in a big try-except block.
 - DO NOT include any other things except the desired function in or after the code block.
 - DO NOT over-fit to the examples: avoid writing code that only works for the provided examples; Avoid using hardcoded values in the code.
-- DO NOT process non-English data.
 - DO NOT truncate any text.
 - DO NOT try to use regex or rules to extract details from the data.
 - DO NOT use duplicate id.
@@ -246,6 +245,7 @@ The python code block should be formulated as
 def process_data(data: str) -> list[dict[str, str]]:
     # Your code here
 ```
+- The python code block is mandatory. If you are uncertain, still provide a simple valid implementation that extracts the most relevant fields.
 - DO NOT include any other things after the code block.
 """
 
@@ -277,7 +277,6 @@ Check if the process_data function code follows these requirements:
 - Code does NOT include hardcoded values that would only work for specific examples
 - Code does NOT include regex or rule-based extraction methods
 - Code does NOT truncate any text content
-- Code does NOT process non-English data
 - Function contains only the required logic, no extra functions or code after it
 
 ## Data Validation Requirements
