@@ -18,8 +18,8 @@ selected data into instruction-response examples or retrieval corpora.
 ## Install
 
 ```bash
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/bjzgcai/AIDE
+cd AIDE
 uv sync
 ```
 
