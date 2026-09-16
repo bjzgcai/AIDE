@@ -15,6 +15,29 @@ natural-language data requirement, it searches for candidate Hugging Face
 datasets, selects useful datasets with an LLM quality gate, and organizes the
 selected data into instruction-response examples or retrieval corpora.
 
+This repository is the code release for the paper *Agentic Intelligent Data
+Engine for Scientific Large Language Models* (Xie et al., *Nature
+Communications*, accepted 2026). The data curated for the paper are archived on
+Zenodo at [10.5281/zenodo.20319939](https://doi.org/10.5281/zenodo.20319939).
+
+## Results at a Glance
+
+Headline numbers from the paper. AIDE was given a one-sentence data
+requirement and ran without human intervention; the resulting corpora were then
+plugged into a fixed downstream pipeline and compared with expert-curated
+alternatives.
+
+| Setting | AIDE-curated data | Comparison |
+| --- | --- | --- |
+| Biomedical RAG, mean accuracy over MMLU-MED, MedQA, MedMCQA, PubMedQA, BioASQ | 86.3% (GPT-4o-mini), 84.4% (Qwen3-32B) | 72.9% / 71.4% without retrieval; best of all 15 unions of the MIRAGE expert corpora on both backbones |
+| Biomedical retrieval corpus | 59 sources, 52.2M snippets | MedCorp (PubMed + StatPearls + Textbooks + Wiki): 4 sources, 30.4M snippets |
+| Chemistry SFT, ChemBench accuracy with Qwen2.5-7B | Higher accuracy on 7 of 9 subtasks, comparable on the other 2 | Mol-Instructions (expert-curated, 1.5M samples); AIDE data are 0.23M samples with 193 more distinct topic tags |
+| Chemistry RAG, ChemBench overall accuracy | 0.52 (GPT-4o-mini), 0.55 (Qwen3-32B) | 0.51 / 0.54 without retrieval; best of the three external chemistry corpora tested |
+| Wall-clock time for a curation run of about 60 datasets | 1 to 4 days, of which 1.1 to 2.3 hours are LLM API time | More than 14 working weeks by the median estimate of 13 surveyed domain experts |
+
+Per-benchmark results, ablations, and the comparison with general-purpose
+coding agents are in the paper and its Supplementary Information.
+
 ## Install
 
 ```bash
@@ -94,6 +117,64 @@ uv run aide-dedup \
   --force
 ```
 
+## Reproducing the Paper
+
+AIDE produces the data; the downstream evaluations use external tools. The
+table maps each reported result to the curation run that produced its data,
+the archived artefact, and the evaluation setup.
+
+| Paper result | Curation run | Archived data (Zenodo) | Evaluation |
+| --- | --- | --- | --- |
+| Biomedical RAG (Fig. 4, Supplementary Tables 2 and 3) | `configs/biomedical_rag.yaml` | `*_rag.jsonl` files in the record root, one per selected dataset (58 files plus the 40-part Healix-Shot archive) | [MedRAG](https://github.com/gzxiong/MedRAG) with a Lucene BM25 index, top 25 snippets per query, temperature 0; backbones GPT-4o-mini and Qwen3-32B (thinking mode off) |
+| Corpus refresh to a later knowledge cut-off (Fig. 7) | Same config, retrieval index restricted to datasets available up to 2022 or up to 2025 | Same files | Same MedRAG setup |
+| Chemistry RAG (Fig. 5a-c, Supplementary Table 5) | Same pipeline with `organization_format: rag` and a chemistry requirement | `chemistry.tar.zst`, folder `chem_rag/` | Same MedRAG setup, evaluated on [ChemBench](https://github.com/lamalab-org/chembench) |
+| Chemistry SFT (Fig. 5d-f, Supplementary Table 6) | `configs/chemistry_instruction.yaml`, then `aide-dedup` | `chemistry.tar.zst`, folder `chem_sft/` | Fine-tune Qwen2.5-1.5B and Qwen2.5-7B with [DeepSpeed](https://github.com/deepspeedai/DeepSpeed): learning rate 1e-6, batch size 1024, 500 steps, generation temperature 0; evaluated on ChemBench |
+
+### Re-running the curation
+
+```bash
+uv run aide-curate --config configs/biomedical_rag.yaml
+uv run aide-curate --config configs/chemistry_instruction.yaml
+```
+
+Each full run took roughly one day of wall-clock time in the paper (about
+2.3M LLM tokens for the biomedical run and 5.8M for the chemistry run). Note
+that Hugging Face Hub search results and dataset contents change over time, so
+a new run will not select exactly the same datasets; the Zenodo record preserves
+the outputs used in the paper.
+
+### Downloading the archived data
+
+The record is about 100 GB in total. Download individual files from
+<https://zenodo.org/records/20319939>, or fetch everything with
+[zenodo_get](https://github.com/dvolgyes/zenodo_get):
+
+```bash
+pip install zenodo_get
+zenodo_get 10.5281/zenodo.20319939
+```
+
+Two artefacts need unpacking:
+
+```bash
+# Healix-Shot is split into 40 zstd parts
+cat health360_Healix-Shot_default_rag.jsonl.zst.part* | zstd -d -o health360_Healix-Shot_default_rag.jsonl
+
+# Chemistry corpora
+tar --zstd -xf chemistry.tar.zst
+```
+
+Layout of the record:
+
+| Path | Contents |
+| --- | --- |
+| `*_rag.jsonl` (record root) | Biomedical retrieval corpus, one file per selected Hugging Face dataset (59 datasets; PubMed alone is 35 GB) |
+| `chemistry.tar.zst` -> `chem_rag/` | Chemistry retrieval corpus, one `*_rag.jsonl` file per selected dataset (59 datasets) |
+| `chemistry.tar.zst` -> `chem_sft/` | The deduplicated chemistry instruction-tuning set used for fine-tuning, as a single JSONL file |
+
+Every `*_rag.jsonl` file holds one JSON object per line with `id` and
+`contents` fields, which is the input format expected by the MedRAG indexer.
+
 ## Configuration
 
 Common fields:
@@ -122,16 +203,33 @@ uv run pytest -q
 
 ## Citation
 
-If you use AIDE in research, please cite the accompanying paper and this
-software release. A machine-readable citation file is available at
+If you use AIDE in research, please cite the paper, the software release, and
+the data record. A machine-readable citation file is available at
 [CITATION.cff](CITATION.cff).
 
 ```bibtex
+@article{xie2026aide,
+  title   = {Agentic Intelligent Data Engine for Scientific Large Language Models},
+  author  = {Xie, Shufang and Liu, Zequn and Deng, Pan and Luo, Renqian and Xia, Yingce and Qin, Tao and Yan, Rui},
+  journal = {Nature Communications},
+  year    = {2026},
+  note    = {in press}
+}
+
 @software{aide_curator_2026,
-  title = {Agentic Intelligent Data Engine for Scientific Large Language Models},
-  author = {Xie, Shufang and Liu, Zequn and Deng, Pan and Luo, Renqian and Xia, Yingce and Qin, Tao and Yan, Rui},
-  year = {2026},
+  title   = {AIDE: Agentic Intelligent Data Engine for Scientific Large Language Models},
+  author  = {Xie, Shufang and Liu, Zequn and Deng, Pan and Luo, Renqian and Xia, Yingce and Qin, Tao and Yan, Rui},
+  year    = {2026},
   version = {0.1.0},
-  license = {MIT}
+  license = {MIT},
+  url     = {https://github.com/bjzgcai/AIDE}
+}
+
+@dataset{xie2026aidedata,
+  title     = {Agentic Intelligent Data Engine for Scientific Large Language Models [Data set]},
+  author    = {Xie, Shufang},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.20319939}
 }
 ```

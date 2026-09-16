@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use AIDE in your research, please cite the accompanying paper and this software release."
 title: "Agentic Intelligent Data Engine for Scientific Large Language Models"
 version: "0.1.0"
-date-released: "2026-06-10"
+date-released: "2026-09-16"
 type: software
 license: MIT
 authors:
