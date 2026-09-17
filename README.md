@@ -5,6 +5,7 @@ Agentic Intelligent Data Engine for Scientific Large Language Models.
 ![Python](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Package Manager](https://img.shields.io/badge/package%20manager-uv-6f42c1)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22805647.svg)](https://doi.org/10.5281/zenodo.22805647)
 
 <p align="center">
   <img src="assets/aide-banner.png" alt="AIDE data-curation workflow banner" width="100%">
@@ -17,8 +18,9 @@ selected data into instruction-response examples or retrieval corpora.
 
 This repository is the code release for the paper *Agentic Intelligent Data
 Engine for Scientific Large Language Models* (Xie et al., *Nature
-Communications*, accepted 2026). The data curated for the paper are archived on
-Zenodo at [10.5281/zenodo.20319939](https://doi.org/10.5281/zenodo.20319939).
+Communications*, accepted 2026). The release used in the paper (v0.1.0) is
+archived on Zenodo at [10.5281/zenodo.22805647](https://doi.org/10.5281/zenodo.22805647),
+and the curated data at [10.5281/zenodo.20319939](https://doi.org/10.5281/zenodo.20319939).
 
 <p align="center">
   <img src="assets/paper/fig1_framework.png" alt="AIDE framework: collection, selection, and organization agents feed SFT or RAG pipelines" width="90%">

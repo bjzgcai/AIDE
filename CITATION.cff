@@ -3,6 +3,7 @@ message: "If you use AIDE in your research, please cite the accompanying paper a
 title: "Agentic Intelligent Data Engine for Scientific Large Language Models"
 version: "0.1.0"
 date-released: "2026-09-16"
+doi: 10.5281/zenodo.22805647
 type: software
 license: MIT
 authors:
