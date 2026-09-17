@@ -20,6 +20,15 @@ Engine for Scientific Large Language Models* (Xie et al., *Nature
 Communications*, accepted 2026). The data curated for the paper are archived on
 Zenodo at [10.5281/zenodo.20319939](https://doi.org/10.5281/zenodo.20319939).
 
+<p align="center">
+  <img src="assets/paper/fig1_framework.png" alt="AIDE framework: collection, selection, and organization agents feed SFT or RAG pipelines" width="90%">
+</p>
+
+*Figure 1 of the paper. Human experts state the requirement; data collection,
+selection, and organization agents produce the corpus; downstream systems are
+built by supervised fine-tuning or retrieval-augmented generation and verified
+on established benchmarks.*
+
 ## Results at a Glance
 
 Headline numbers from the paper. AIDE was given a one-sentence data
@@ -34,6 +43,22 @@ alternatives.
 | Chemistry SFT, ChemBench accuracy with Qwen2.5-7B | Higher accuracy on 7 of 9 subtasks, comparable on the other 2 | Mol-Instructions (expert-curated, 1.5M samples); AIDE data are 0.23M samples with 193 more distinct topic tags |
 | Chemistry RAG, ChemBench overall accuracy | 0.52 (GPT-4o-mini), 0.55 (Qwen3-32B) | 0.51 / 0.54 without retrieval; best of the three external chemistry corpora tested |
 | Wall-clock time for a curation run of about 60 datasets | 1 to 4 days, of which 1.1 to 2.3 hours are LLM API time | More than 14 working weeks by the median estimate of 13 surveyed domain experts |
+
+<p align="center">
+  <img src="assets/paper/fig4_biomedical_rag.png" alt="Biomedical RAG accuracy of AIDE versus MIRAGE corpus unions" width="80%">
+</p>
+
+*Figure 4 of the paper. Biomedical RAG accuracy for the AIDE corpus (top row),
+the 15 unions of the four MIRAGE expert corpora, and the no-retrieval baseline
+(bottom row), with Qwen3-32B (circles) and GPT-4o-mini (squares).*
+
+<p align="center">
+  <img src="assets/paper/fig5_chemistry.png" alt="Chemistry RAG and SFT results on ChemBench" width="90%">
+</p>
+
+*Figure 5 of the paper. ChemBench accuracy by subtask for retrieval (a-c) and
+fine-tuning (d-f); panel f shows the number of distinct topics as a function of
+sample size for the AIDE-curated and Mol-Instructions datasets.*
 
 Per-benchmark results, ablations, and the comparison with general-purpose
 coding agents are in the paper and its Supplementary Information.
@@ -203,9 +228,7 @@ uv run pytest -q
 
 ## Citation
 
-If you use AIDE in research, please cite the paper, the software release, and
-the data record. A machine-readable citation file is available at
-[CITATION.cff](CITATION.cff).
+If you use AIDE in research, please cite the paper:
 
 ```bibtex
 @article{xie2026aide,
@@ -215,21 +238,7 @@ the data record. A machine-readable citation file is available at
   year    = {2026},
   note    = {in press}
 }
-
-@software{aide_curator_2026,
-  title   = {AIDE: Agentic Intelligent Data Engine for Scientific Large Language Models},
-  author  = {Xie, Shufang and Liu, Zequn and Deng, Pan and Luo, Renqian and Xia, Yingce and Qin, Tao and Yan, Rui},
-  year    = {2026},
-  version = {0.1.0},
-  license = {MIT},
-  url     = {https://github.com/bjzgcai/AIDE}
-}
-
-@dataset{xie2026aidedata,
-  title     = {Agentic Intelligent Data Engine for Scientific Large Language Models [Data set]},
-  author    = {Xie, Shufang},
-  year      = {2026},
-  publisher = {Zenodo},
-  doi       = {10.5281/zenodo.20319939}
-}
 ```
+
+The curated data are archived on Zenodo at
+[10.5281/zenodo.20319939](https://doi.org/10.5281/zenodo.20319939).
